@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -22,6 +26,8 @@ var (
 
 	write     = app.Command("write", "Write a config file to dynamo")
 	writeFile = write.Arg("config", "Config file to write").ExistingFile()
+
+	propRe = regexp.MustCompile(`^(\w+)=(.*)$`)
 )
 
 type Config map[string]string
@@ -81,6 +87,46 @@ func Read(table, key, value string) {
 
 }
 
+func Write(table string, path string) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	config := Config{}
+	var key string
+	var value string
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			// Ignore blank lines
+			continue
+		}
+		if propRe.MatchString(line) {
+			if key != "" {
+				config[key] = value
+			}
+			matches := propRe.FindStringSubmatch(line)
+			key = matches[1]
+			value = matches[2]
+		} else {
+			// Continuation of a previous property "^  indented..."
+			value += "\n" + strings.TrimRight(line, " \t")
+		}
+	}
+	// Catch final prop
+	if key != "" {
+		config[key] = value
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	// now write to dynamo TODO
+}
+
 func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	// Read
@@ -89,7 +135,6 @@ func main() {
 
 	// Write
 	case write.FullCommand():
-		fmt.Printf("WRITING TO %s\n", *table)
-		fmt.Printf("%s is written\n", *writeFile)
+		Write(*table, *writeFile)
 	}
 }
