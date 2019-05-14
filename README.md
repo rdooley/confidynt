@@ -5,9 +5,29 @@ Confident 12 factor config in dynamo db CLI tool
 
 ### Usage
 
+
+* Writing a config
+
 ```
-TODO
+❯ cat example.conf
+environment=confidynt-example
+alpha_first="sandwich
+    hotdog"
+comes_first=fart
+other_thing=barbeque
+CLOUDWATCH_THING="ref to $environment"
+❯ confidynt --table=deployment write example.conf
+example.conf written to deployment
 ```
 
 
-Use go1.12 for now its what im building this on
+* Reading a config
+```
+❯ confidynt --table=deployment read environment confidynt-example
+environment=confidynt-example
+comes_first=fart
+CLOUDWATCH_THING="ref to $environment"
+alpha_first="sandwich
+    hotdog"
+other_thing=barbeque
+```
