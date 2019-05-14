@@ -14,3 +14,5 @@
 vendor
 tags
 build
+
+coverage.txt

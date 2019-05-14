@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"regexp"
@@ -18,7 +19,7 @@ import (
 var propRe = regexp.MustCompile(`^(\w+)=(.*)$`)
 
 // Write a given config file to a dynamo db table
-func Write(table string, path string, ds service.Dynamo) {
+func Write(table string, path string, ds service.Dynamo, w io.Writer) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -60,28 +61,28 @@ func Write(table string, path string, ds service.Dynamo) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
-				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
 			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
 			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
 			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
 			case dynamodb.ErrCodeTransactionConflictException:
-				fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeTransactionConflictException, aerr.Error())
 			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
 			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+				fmt.Fprintln(w, dynamodb.ErrCodeInternalServerError, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				fmt.Fprintln(w, aerr.Error())
 			}
 		} else {
 			// Print the error, cast err to awserr.Error to get the Code and
 			// Message from an error.
-			fmt.Println(err.Error())
+			fmt.Fprintln(w, err.Error())
 		}
 		return
 	}
-	fmt.Printf("%s written to %s\n", path, table)
+	fmt.Fprintf(w, "%s written to %s\n", path, table)
 }

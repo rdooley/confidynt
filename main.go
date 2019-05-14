@@ -28,9 +28,9 @@ func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	// Read
 	case read.FullCommand():
-		cli.Read(*table, *readKey, *readValue, dynamo)
+		cli.Read(*table, *readKey, *readValue, dynamo, os.Stdout)
 	// Write
 	case write.FullCommand():
-		cli.Write(*table, *writeFile, dynamo)
+		cli.Write(*table, *writeFile, dynamo, os.Stdout)
 	}
 }
