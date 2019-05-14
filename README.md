@@ -1,7 +1,7 @@
 Confidynt
 ============
 
-Confident 12 factor config in dynamo db CLI tool
+Confident [12 factor config](https://12factor.net/config) in dynamo db CLI tool
 
 ### Usage
 
