@@ -8,18 +8,17 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
+	"github.com/rdooley/confidynt/service"
 	"github.com/rdooley/confidynt/types"
 )
 
 var propRe = regexp.MustCompile(`^(\w+)=(.*)$`)
 
 // Write a given config file to a dynamo db table
-func Write(table string, path string) {
+func Write(table string, path string, ds service.Dynamo) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -56,17 +55,7 @@ func Write(table string, path string) {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	svc := dynamodb.New(session.New(&aws.Config{Region: aws.String("us-east-1")}))
-	var item = map[string]*dynamodb.AttributeValue{}
-	for k, v := range config {
-		item[k] = &dynamodb.AttributeValue{S: aws.String(v)}
-	}
-	input := &dynamodb.PutItemInput{
-		Item:      item,
-		TableName: aws.String(table),
-	}
-
-	_, err = svc.PutItem(input)
+	err = ds.Write(table, config)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {

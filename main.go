@@ -6,6 +6,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/rdooley/confidynt/cli"
+	"github.com/rdooley/confidynt/service"
 )
 
 var (
@@ -19,15 +20,17 @@ var (
 
 	write     = app.Command("write", "Write a config file to dynamo")
 	writeFile = write.Arg("config", "Config file to write").ExistingFile()
+
+	dynamo = service.NewDynamo()
 )
 
 func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	// Read
 	case read.FullCommand():
-		cli.Read(*table, *readKey, *readValue)
+		cli.Read(*table, *readKey, *readValue, dynamo)
 	// Write
 	case write.FullCommand():
-		cli.Write(*table, *writeFile)
+		cli.Write(*table, *writeFile, dynamo)
 	}
 }

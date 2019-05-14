@@ -13,23 +13,23 @@ import (
 )
 
 // DynamoService provides an interface for dynamodb
-type DynamoService interface {
+type Dynamo interface {
 	Read(table, key, value string) (types.Config, error)
 	Write(table string, c types.Config) error
 }
-type dynamoService struct {
+type dynamo struct {
 	region string
 }
 
 // NewDynamoService returns a new dynamo service
-func NewDynamoService() DynamoService {
-	return &dynamoService{
+func NewDynamo() Dynamo {
+	return &dynamo{
 		region: "us-east-1",
 	}
 }
 
 // Read a config matching key=value from the given table
-func (dynamoService) Read(table, key, value string) (c types.Config, err error) {
+func (dynamo) Read(table, key, value string) (c types.Config, err error) {
 	// TODO region support
 	svc := dynamodb.New(session.New(&aws.Config{Region: aws.String("us-east-1")}))
 	input := &dynamodb.QueryInput{
@@ -61,7 +61,7 @@ func (dynamoService) Read(table, key, value string) (c types.Config, err error) 
 }
 
 // Write a config to the given table
-func (dynamoService) Write(table string, c types.Config) (err error) {
+func (dynamo) Write(table string, c types.Config) (err error) {
 	// TODO region support
 	svc := dynamodb.New(session.New(&aws.Config{Region: aws.String("us-east-1")}))
 	var item = map[string]*dynamodb.AttributeValue{}
