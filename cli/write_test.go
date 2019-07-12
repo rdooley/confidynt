@@ -29,10 +29,12 @@ func TestWrite(t *testing.T) {
 	conf := types.Config{}
 	conf[key] = val
 	conf["other_key"] = "other_val"
+	conf["multi_key"] = "\"multi\n #linething\""
 
 	text := "key=val\n"
 	text += "# a comment\n"
 	text += "other_key=other_val\n"
+	text += "multi_key=\"multi\n #linething\"\n"
 	ioutil.WriteFile(path, []byte(text), 0644)
 
 	buf := new(bytes.Buffer)
