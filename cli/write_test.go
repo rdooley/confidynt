@@ -31,6 +31,7 @@ func TestWrite(t *testing.T) {
 	conf["other_key"] = "other_val"
 
 	text := "key=val\n"
+	text += "# a comment\n"
 	text += "other_key=other_val\n"
 	ioutil.WriteFile(path, []byte(text), 0644)
 
