@@ -36,6 +36,10 @@ func Write(table string, path string, ds service.Dynamo, w io.Writer) {
 			// Ignore blank lines
 			continue
 		}
+		if strings.HasPrefix(line, "#") {
+			// Ignore comments in flat files
+			continue
+		}
 		if propRe.MatchString(line) {
 			if key != "" {
 				config[key] = value
